@@ -1,0 +1,29 @@
+{
+  "name": "gptrakkme",
+  "version": "1.0.0",
+  "description": "A single page webapp for GPX visualization",
+  "main": "dist/bundle.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sehaas/gptrakkme.git"
+  },
+  "keywords": [
+    "gpx",
+    "visualization",
+    "track",
+    "heartrate",
+    "elevation"
+  ],
+  "author": "Sebastian Haas",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sehaas/gptrakkme/issues"
+  },
+  "homepage": "https://github.com/sehaas/gptrakkme#readme",
+  "devDependencies": {
+    "webpack": "^3.4.1"
+  }
+}
