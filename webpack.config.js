@@ -1,8 +1,10 @@
+const webpack = require('webpack');
+const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-module.exports = {
+const config = {
 	entry: {
 		app: './src/index.js'
 	},
@@ -13,6 +15,21 @@ module.exports = {
 	devServer: {
 		contentBase: './dist'
 	},
+	module: {
+		rules: [
+			{
+				test: /\.css$/,
+				use: [
+					'style-loader',
+					'css-loader'
+				]
+			},
+			{
+				test: /\.(png|svg|jpg|gif)$/,
+				use: ['file-loader']
+			}
+		]
+	},
 	plugins: [
 		new CleanWebpackPlugin(['dist']),
 		new HtmlWebpackPlugin({
@@ -20,3 +37,16 @@ module.exports = {
 		})
 	]
 };
+
+if (process.env.NODE_ENV !== 'production') {
+	config.plugins.push(
+		new CopyWebpackPlugin([
+			{
+				from: 'test_data/*.gpx',
+				to: './'
+			}
+		])
+	);
+}
+
+module.exports = config;
