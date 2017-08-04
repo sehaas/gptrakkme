@@ -4,7 +4,9 @@
 	"description": "A single page webapp for GPX visualization",
 	"main": "dist/bundle.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"build": "webpack",
+		"watch": "webpack --watch",
+		"start": "webpack-dev-server --open"
 	},
 	"repository": {
 		"type": "git",
@@ -26,6 +28,7 @@
 	"devDependencies": {
 		"clean-webpack-plugin": "^0.1.16",
 		"html-webpack-plugin": "^2.30.1",
-		"webpack": "^3.4.1"
-    }
+		"webpack": "^3.4.1",
+		"webpack-dev-server": "^2.6.1"
+	}
 }
