@@ -8,9 +8,10 @@ require('leaflet-fullscreen');
 var gpx2geojson = require('@mapbox/togeojson').gpx;
 var d3 = require('d3');
 
+const gptrakkme = window.gptrakkme = {};
 
 // create map
-var map = window.gpxmap = L.map(d3.select(document.body)
+var map = gptrakkme.map = L.map(d3.select(document.body)
 	.append('div')
 	.attr('id', 'map')
 	.node(), {
@@ -39,7 +40,7 @@ var hereMarker = L.circleMarker(L.latLng(0, 0), {
 }).addTo(map);
 
 
-var renderLayer = function(str) {
+gptrakkme.renderLayer = function(str) {
 
 	var dom = (new DOMParser()).parseFromString(str, 'text/xml');
 	var geojson = gpx2geojson(dom);
@@ -123,4 +124,4 @@ var renderLayer = function(str) {
 
 //d3.text('feldkirchen.gpx', renderLayer);
 //d3.text('Radtour_Linz_Ampflwang.gpx', renderLayer);
-d3.text('test_data/traunstein_1.8.gpx', renderLayer);
+d3.text('test_data/traunstein_1.8.gpx', gptrakkme.renderLayer);
