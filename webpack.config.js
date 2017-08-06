@@ -13,7 +13,10 @@ const config = {
 		path: path.resolve(__dirname, 'dist')
 	},
 	devServer: {
-		contentBase: './dist'
+		contentBase: './dist',
+		historyApiFallback: {
+			index: 'index.html'
+		}
 	},
 	module: {
 		rules: [
