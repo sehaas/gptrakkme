@@ -10,12 +10,13 @@ const config = {
 	},
 	output: {
 		filename: '[name].bundle.js',
-		path: path.resolve(__dirname, 'dist')
+		path: path.resolve(__dirname, 'dist'),
+		publicPath: '/'
 	},
 	devServer: {
 		contentBase: './dist',
 		historyApiFallback: {
-			index: 'index.html'
+			index: '/index.html'
 		}
 	},
 	module: {

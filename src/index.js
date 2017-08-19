@@ -9,6 +9,7 @@ var gpx2geojson = require('@mapbox/togeojson').gpx;
 var d3 = require('d3');
 
 var coordist = require('coordist');
+var navigo = require('navigo');
 
 const gptrakkme = window.gptrakkme = {};
 
@@ -41,6 +42,11 @@ var hereMarker = L.circleMarker(L.latLng(0, 0), {
 	fillColor: 'red', fillOpacity: 1, radius: 5
 }).addTo(map);
 
+gptrakkme.loadTracks = function(error, data) {
+	data.tracks.forEach(function(track) {
+		d3.text(track, gptrakkme.renderLayer);
+	});
+};
 
 gptrakkme.renderLayer = function(str) {
 
@@ -195,7 +201,17 @@ gptrakkme.renderLayer = function(str) {
 		.on("mousemove", moveMarker);
 };
 
+var root = window.location.origin;
+var useHash = false; // Defaults to: false
+var hash = '#!'; // Defaults to: '#'
+var router = new navigo(root, useHash, hash);
 
-//d3.text('feldkirchen.gpx', renderLayer);
-//d3.text('Radtour_Linz_Ampflwang.gpx', renderLayer);
-d3.text('test_data/traunstein_1.8.gpx', gptrakkme.renderLayer);
+router.on({
+	'/:trk': function(params) {
+		console.log(params);
+		d3.json('/test_data/' + params.trk, gptrakkme.loadTracks);
+	},
+	'*': function() {
+		console.log('default', arguments);
+	}
+}).resolve();
