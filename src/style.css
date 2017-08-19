@@ -20,10 +20,26 @@ body {
 	stroke:darkred;
 }
 
+.speed-line {
+	fill:none;
+	stroke-width: 1;
+	stroke:blue;
+}
+
 .here-indicator {
 	fill:darkred;
 }
 
 .chart text {
 	font-size:10px;
+}
+
+.status-box {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.marker-box, .total-box {
+    flex: 50% 1 0;
 }
