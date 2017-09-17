@@ -14,7 +14,7 @@ const config = {
 		publicPath: '/'
 	},
 	devServer: {
-		contentBase: './dist',
+		contentBase: path.resolve(__dirname, 'dist'),
 		historyApiFallback: {
 			index: '/index.html'
 		}
@@ -35,19 +35,23 @@ const config = {
 		]
 	},
 	plugins: [
-		new CleanWebpackPlugin(['dist']),
 		new HtmlWebpackPlugin({
 			title: "gptrakkme"
 		})
 	]
 };
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.SKIP_CLEAN !== 'true') {
+	config.plugins.push(
+		new CleanWebpackPlugin(['dist'])
+	);
+}
+if (process.env.NODE_ENV !== 'FIXME_production') {
 	config.plugins.push(
 		new CopyWebpackPlugin([
 			{
-				from: 'test_data/*.gpx',
-				to: './'
+				from: 'test_data',
+				to: 'data'
 			}
 		])
 	);

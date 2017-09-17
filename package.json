@@ -7,7 +7,7 @@
 		"build": "webpack",
 		"build:dist": "NODE_ENV=production webpack -p",
 		"watch": "webpack --watch",
-		"start": "webpack-dev-server --open"
+		"start": "SKIP_CLEAN=true webpack-dev-server --open"
 	},
 	"repository": {
 		"type": "git",

@@ -43,3 +43,15 @@ body {
 .marker-box, .total-box {
     flex: 50% 1 0;
 }
+
+#svg-icons {
+	display: block;
+	width: 100px;
+	height: 100px;
+	border: solid 1px;
+	margin: 10px;
+}
+
+.track-info > div {
+	text-align: right;
+}

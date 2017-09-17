@@ -1,0 +1,74 @@
+[class^="gpt-"]:before, [class*=" gpt-"]:before {
+	content:"";
+	display: inline-block;
+	background-repeat: no-repeat;
+	background-image: url(sprite.svg);
+	background-size: auto 100%;
+	width: 1em;
+	height: 1em;
+	position: absolute;
+	left: 0.5em;
+}
+
+[class^="gpt-"], [class*=" gpt-"] {
+	padding-left: 2em;
+	position: relative;
+}
+.icon.small-padding {
+	padding-left: 0.5em;
+}
+
+.icon-2x:before {
+	width: 2em;
+	height: 2em;
+}
+.icon-2x {
+	padding-left: 3em;
+}
+.icon-3x:before {
+	width: 3em;
+	height: 3em;
+}
+.icon-3x {
+	padding-left: 4em;
+}
+.icon-4x:before {
+	width: 4em;
+	height: 4em;
+}
+.icon-4x {
+	padding-left: 5em;
+}
+.gpt-descent:before {
+	background-position: 0% 0;
+}
+.gpt-ascent:before {
+	background-position: 10% 0;
+}
+.gpt-heartbeat:before {
+	background-position: 20% 0;
+}
+.gpt-area-graph:before {
+	background-position: 30% 0;
+}
+.gpt-gauge:before {
+	background-position: 40% 0;
+}
+.gpt-globe:before {
+	background-position: 50% 0;
+}
+.gpt-heart:before {
+	background-position: 60% 0;
+}
+.gpt-location:before {
+	background-position: 70% 0;
+}
+.gpt-map:before {
+	background-position: 80% 0;
+}
+.gpt-stopwatch:before {
+	background-position: 90% 0;
+}
+.gpt-avg:before {
+	background-position: 100% 0;
+}

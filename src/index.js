@@ -1,6 +1,7 @@
 import './style.css';
 import '../node_modules/leaflet/dist/leaflet.css';
 import '../node_modules/leaflet-fullscreen/dist/leaflet.fullscreen.css';
+import './icomoon_10_icons/sprite/sprite.css';
 
 var L = require('leaflet');
 require('leaflet-easybutton');
@@ -12,6 +13,13 @@ var coordist = require('coordist');
 var navigo = require('navigo');
 
 const gptrakkme = window.gptrakkme = {};
+
+d3.formatDefaultLocale({
+	"decimal": ",",
+	"thousands": ".",
+	"grouping": [3],
+	"currency": ["", "\u00a0€"]
+});
 
 // create map
 var map = gptrakkme.map = L.map(d3.select(document.body)
@@ -44,6 +52,7 @@ var hereMarker = L.circleMarker(L.latLng(0, 0), {
 
 gptrakkme.loadTracks = function(error, data) {
 	data.tracks.forEach(function(track) {
+		d3.select('title').text('gptrakkme | ' + data.name);
 		d3.text(track, gptrakkme.renderLayer);
 	});
 };
@@ -79,7 +88,12 @@ gptrakkme.renderLayer = function(str) {
 		dist += d;
 		last = curr;
 	}
-
+	var detail = [];
+	detail.push([
+		'gpt-location',
+		[d3.format('.4s')(parseInt(dist)) + "m"],
+		[]
+	]);
 
 	var datePlaceHeart = props.coordTimes.map(function(d, i) {
 			var hr = 0; // support tracks without HR data
@@ -93,6 +107,16 @@ gptrakkme.renderLayer = function(str) {
 		margin = 20,
 		width = d3.select('body').node().offsetWidth - 2 * margin;
 
+	detail.push([
+		'gpt-stopwatch',
+		[d3.utcFormat("%Hh:%Mm:%Ss")(datePlaceHeart[datePlaceHeart.length-1][0] - datePlaceHeart[0][0])],
+		[] // TODO: Pause??
+	]);
+	detail.push([
+		'gpt-area-graph',
+		[d3.format(',')(parseInt(Math.abs(hM_a))) + 'm', 'gpt-ascent'],
+		[d3.format(',')(parseInt(Math.abs(hM_d))) + 'm', 'gpt-descent']
+	]);
 
 	// render map layers
 	var casingLayer = L.geoJson(geojson, {
@@ -109,25 +133,36 @@ gptrakkme.renderLayer = function(str) {
 	var x = d3.scaleTime()
 		.domain([datePlaceHeart[0][0], datePlaceHeart[datePlaceHeart.length-1][0]])
 		.rangeRound([0, width]);
+
+	var maxHeight = d3.max(datePlaceHeart, function(d) { return d[1][2]; });
+	var minHeight = d3.min(datePlaceHeart, function(d) { return d[1][2]; });
 	var elevation = d3.scaleLinear()
 		.range([height, 0])
-		.domain([0, d3.max(datePlaceHeart, function(d) {
-			return d[1][2];
-		})]);
-
-	var maxHeart = d3.max(datePlaceHeart, function(d) { return d[2]; });
-	var avgHeart = d3.mean(datePlaceHeart, function(d) { return d[2]; });
-	var heart = d3.scaleLinear()
-		.range([height, 0])
-		.domain([0, maxHeart]);
+		.domain([0, maxHeight]);
 
 	var maxSpeed = d3.max(datePlaceHeart, function(d) { return d[3]; });
 	var avgSpeed = d3.mean(datePlaceHeart, function(d) { return d[3]; });
+	var minSpeed = d3.min(datePlaceHeart, function(d) { return d[3]; });
 	var speed = d3.scaleLinear()
 		.range([height, 0])
-		.domain([0, d3.max(datePlaceHeart, function(d) {
-			return d[3];
-		})]);
+		.domain([minSpeed, maxSpeed]);
+	detail.push([
+		'gpt-gauge',
+		[d3.format('.2f')(avgSpeed) + ' km/h', 'gpt-avg'],
+		[d3.format('.2f')(maxSpeed) + ' km/h']
+	]);
+
+	var maxHeart = d3.max(datePlaceHeart, function(d) { return d[2]; });
+	var avgHeart = d3.mean(datePlaceHeart, function(d) { return d[2]; });
+	var minHeart = d3.min(datePlaceHeart, function(d) { return d[2]; });
+	var heart = d3.scaleLinear()
+		.range([height, 0])
+		.domain([minHeart, maxHeart]);
+	detail.push([
+		'gpt-heartbeat',
+		[parseInt(avgHeart) + ' bpm', 'gpt-avg'],
+		[parseInt(maxHeart) + ' bpm']
+	]);
 
 	var elevationLine = d3.area()
 		.x(function(d) { return x(d[0]); })
@@ -144,7 +179,7 @@ gptrakkme.renderLayer = function(str) {
 		.x(function(d) { return x(d[0]); })
 		.y(function(d) { return heart(d[2]); });
 
-	var svg = d3.select('body').append('svg')
+	var svg = d3.select(document.body).append('svg')
 		.attr('width', width + 2 * margin)
 		.attr('height', height + 2 * margin);
 	var g = svg.append('g')
@@ -169,18 +204,22 @@ gptrakkme.renderLayer = function(str) {
 		.attr('height', height);
 
 
-	var statusDiv = d3.select('body').append('div').attr('class', 'status-box');
-	var markerDiv = statusDiv.append('div').attr('class', 'marker-box');
+	var statusDiv = d3.select(document.body).append('div').attr('class', 'status-box');
+	var markerDiv = statusDiv.append('div').attr('class', 'marker-box').attr('style', 'display:none;');
 	var heightText = markerDiv.append('div').attr('class', 'marker-value');
 	var heartText = markerDiv.append('div').attr('class', 'marker-value');
 	var speedText = markerDiv.append('div').attr('class', 'marker-value');
 
-	var totalDiv = statusDiv.append('div').attr('class', 'total-box');
-	var zeit = datePlaceHeart[datePlaceHeart.length-1][0] - datePlaceHeart[0][0];
-	totalDiv.append('div').text('Distanz: ' + meter(dist) + 'm / Zeit: ' + d3.utcFormat("%H:%M")(zeit));
-	totalDiv.append('div').text('Geschwindigkeit: max ' + meter(maxSpeed) + 'km/h / avg ' + meter(avgSpeed) + 'km/h');
-	totalDiv.append('div').text('Höhenmeter: ' + meter(hM_a) + 'm / ' + meter(hM_d) + 'm');
-	totalDiv.append('div').text('Puls: max ' + meter(maxHeart) + 'bpm / avg ' + meter(avgHeart) + 'bpm');
+	var totalDiv = statusDiv.selectAll('.track-info').data(detail);
+	totalDiv.enter()
+		.append('div').attr('class', function(d) { return 'track-info icon-2x ' + d[0]; })
+			.append('div').attr('class', function(d) { return (d[1][1] || '') })
+			.html(function(d) {return d[1][0]; })
+		.select(function() { return this.parentNode; })
+			.append('div').attr('class', function(d) { return (d[2][1] || '') })
+			.html(function(d) {return d[2][0]; });
+	totalDiv.exit().remove();
+
 
 	var moveMarker = function(evt){
 		var posX = d3.mouse(this)[0];
@@ -209,7 +248,11 @@ var router = new navigo(root, useHash, hash);
 router.on({
 	'/:trk': function(params) {
 		console.log(params);
-		d3.json('/test_data/' + params.trk, gptrakkme.loadTracks);
+		d3.json('/data/' + params.trk, gptrakkme.loadTracks);
+	},
+	'/r/:trk': function(params) {
+		console.log(params);
+		d3.text('/data/' + params.trk + '.gpx', gptrakkme.renderLayer);
 	},
 	'*': function() {
 		console.log('default', arguments);
