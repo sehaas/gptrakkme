@@ -11,6 +11,7 @@ var d3 = require('d3');
 
 var coordist = require('coordist');
 var navigo = require('navigo');
+var DeviationStream = require('standard-deviation-stream');
 
 const gptrakkme = window.gptrakkme = {};
 
@@ -73,6 +74,7 @@ gptrakkme.renderLayer = function(str) {
 
 	props.distance = [0.0];
 	props.speed = [0.0];
+	var speedDeviation = new DeviationStream();
 	for(var i = 1; i < coords.length; i++) {
 		var curr = {lng:coords[i][0], lat:coords[i][1], alt:coords[i][2]};
 		var hm = curr.alt - last.alt;
@@ -83,11 +85,18 @@ gptrakkme.renderLayer = function(str) {
 		}
 		var d = coordist.distance(last, curr, false);
 		var dt = new Date(props.coordTimes[i]) - new Date(props.coordTimes[i-1]);
-		props.speed[i] = 3600 * d / dt;
+		var tmp_speed = 3600 * d / dt;
+		speedDeviation.push(tmp_speed);
+		props.speed[i] = tmp_speed;
 		props.distance[i] = d;
 		dist += d;
 		last = curr;
 	}
+	props.speed.forEach(function(v, i) {
+		if ((v - speedDeviation.mean()) > (speedDeviation.standardDeviation() * 5)) {
+			props.speed[i] = null;
+		}
+	});
 	var detail = [];
 	detail.push([
 		'gpt-location',
@@ -171,11 +180,21 @@ gptrakkme.renderLayer = function(str) {
 
 	var speedLine = d3.line()
 		.curve(d3.curveBasis)
+		.defined(function(d) {
+			var show = d[3]!=null;
+			if (!show) console.log('Skip speed:', d[0]);
+			return show;
+		})
 		.x(function(d) { return x(d[0]); })
 		.y(function(d) { return speed(d[3]); });
 
 	var heartLine = d3.line()
 		.curve(d3.curveBasis)
+		.defined(function(d) {
+			var show = d[2]!=null;
+			if (!show) console.log('Skip HR:', d[0]);
+			return show;
+		})
 		.x(function(d) { return x(d[0]); })
 		.y(function(d) { return heart(d[2]); });
 
