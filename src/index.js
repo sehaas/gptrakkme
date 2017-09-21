@@ -43,7 +43,7 @@ var BasemapAT_grau = L.tileLayer('https://maps{s}.wien.gv.at/basemap/bmapgrau/no
 BasemapAT_grau.addTo(map);
 L.control.scale().addTo(map);
 var allLayers = L.featureGroup([]);
-L.easyButton( 'fa-star', function(){
+L.easyButton( 'gpt-sphere', function(){
 	map.fitBounds(allLayers.getBounds());
 }).addTo(map);
 var hereMarker = L.circleMarker(L.latLng(0, 0), {
