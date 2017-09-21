@@ -39,36 +39,40 @@
 .icon-4x {
 	padding-left: 5em;
 }
-.gpt-descent:before {
+.gpt-sphere:before {
 	background-position: 0% 0;
 }
-.gpt-ascent:before {
+.gpt-top:before {
+	background-position: 5% 0;
+}
+.gpt-bottom:before {
 	background-position: 10% 0;
 }
-.gpt-heartbeat:before {
+.gpt-descent:before {
+	background-position: 15% 0;
+}
+.gpt-ascent:before {
 	background-position: 20% 0;
+}
+.gpt-heartbeat:before {
+	background-position: 25% 0;
 }
 .gpt-area-graph:before {
 	background-position: 30% 0;
 }
+.gpt-avg:before {
+	background-position: 35% 0;
+}
 .gpt-gauge:before {
 	background-position: 40% 0;
 }
-.gpt-globe:before {
-	background-position: 50% 0;
-}
-.gpt-heart:before {
-	background-position: 60% 0;
-}
 .gpt-location:before {
-	background-position: 70% 0;
+	background-position: 45% 0;
 }
 .gpt-map:before {
-	background-position: 80% 0;
+	background-position: 50% 0;
 }
 .gpt-stopwatch:before {
-	background-position: 90% 0;
+	background-position: 55% 0;
 }
-.gpt-avg:before {
-	background-position: 100% 0;
-}
+

@@ -1,7 +1,7 @@
 import './style.css';
 import '../node_modules/leaflet/dist/leaflet.css';
 import '../node_modules/leaflet-fullscreen/dist/leaflet.fullscreen.css';
-import './icomoon_10_icons/sprite/sprite.css';
+import './sprite.css';
 
 var L = require('leaflet');
 require('leaflet-easybutton');
