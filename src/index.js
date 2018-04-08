@@ -51,15 +51,29 @@ var hereMarker = L.circleMarker(L.latLng(0, 0), {
 	fillColor: 'red', fillOpacity: 1, radius: 5
 }).addTo(map);
 
+gptrakkme.colors = {
+	'single': '#FF0000',
+	'0': '#FF0000',
+	'1': '#800080',
+	'2': '#008000',
+	'3': '#808000',
+	'4': '#008080'
+};
+
 gptrakkme.loadTracks = function(error, data) {
+	d3.select('title').text('gptrakkme | ' + data.name);
+	var q = d3.queue();
 	data.tracks.forEach(function(track) {
-		d3.select('title').text('gptrakkme | ' + data.name);
-		d3.text(track, gptrakkme.renderLayer);
+		console.log(track);
+		q = q.defer(d3.text, track);
+	});
+	q.awaitAll(function(error, results) {
+		if (error) throw error;
+		results.forEach(gptrakkme.renderLayer);
 	});
 };
 
-gptrakkme.renderLayer = function(str) {
-
+gptrakkme.renderLayer = function(str, trackIndex) {
 	var dom = (new DOMParser()).parseFromString(str, 'text/xml');
 	var geojson = gpx2geojson(dom);
 
@@ -85,7 +99,7 @@ gptrakkme.renderLayer = function(str) {
 		}
 		var d = coordist.distance(last, curr, false);
 		var dt = new Date(props.coordTimes[i]) - new Date(props.coordTimes[i-1]);
-		var tmp_speed = 3600 * d / dt;
+		var tmp_speed = dt != 0 ? 3600 * d / dt : null;
 		speedDeviation.push(tmp_speed);
 		props.speed[i] = tmp_speed;
 		props.distance[i] = d;
@@ -114,7 +128,7 @@ gptrakkme.renderLayer = function(str) {
 		bisectPlace = d3.bisector(function(d) { return d[0]; }).left,
 		height = 100,
 		margin = 20,
-		width = d3.select('body').node().offsetWidth - 2 * margin;
+		width = d3.select('body').node().offsetWidth - 2 * margin - 10;
 
 	detail.push([
 		'gpt-stopwatch',
@@ -132,7 +146,7 @@ gptrakkme.renderLayer = function(str) {
 		style: function() { return { weight: 6, color: '#fff', opacity: 1 }; }
 	}).addTo(map);
 	var runLayer = L.geoJson(geojson, {
-		style: function() { return { weight: 4, color: '#ff0000', opacity: 0.5 }; }
+		style: function() { return { weight: 4, color: gptrakkme.colors[trackIndex], opacity: 0.5 }; }
 	}).addTo(map);
 	// add
 	allLayers.addLayer(runLayer);
@@ -198,7 +212,8 @@ gptrakkme.renderLayer = function(str) {
 		.x(function(d) { return x(d[0]); })
 		.y(function(d) { return heart(d[2]); });
 
-	var svg = d3.select(document.body).append('svg')
+	var trackDiv = d3.select(document.body).append('div').attr('class', 'track-nr track-nr-' + trackIndex);
+	var svg = trackDiv.append('svg')
 		.attr('width', width + 2 * margin)
 		.attr('height', height + 2 * margin);
 	var g = svg.append('g')
@@ -223,7 +238,7 @@ gptrakkme.renderLayer = function(str) {
 		.attr('height', height);
 
 
-	var statusDiv = d3.select(document.body).append('div').attr('class', 'status-box');
+	var statusDiv = trackDiv.append('div').attr('class', 'status-box');
 	var markerDiv = statusDiv.append('div').attr('class', 'marker-box').attr('style', 'display:none;');
 	var heightText = markerDiv.append('div').attr('class', 'marker-value');
 	var heartText = markerDiv.append('div').attr('class', 'marker-value');
@@ -271,7 +286,9 @@ router.on({
 	},
 	'/r/:trk': function(params) {
 		console.log(params);
-		d3.text('/data/' + params.trk + '.gpx', gptrakkme.renderLayer);
+		d3.text('/data/' + params.trk + '.gpx', function(data) {
+			gptrakkme.renderLayer(data, 'single');
+		});
 	},
 	'*': function() {
 		console.log('default', arguments);

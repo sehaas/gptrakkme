@@ -44,14 +44,6 @@ body {
     flex: 50% 1 0;
 }
 
-#svg-icons {
-	display: block;
-	width: 100px;
-	height: 100px;
-	border: solid 1px;
-	margin: 10px;
-}
-
 .track-info > div {
 	text-align: right;
 }
@@ -69,4 +61,35 @@ button.easy-button-button {
 .easy-button-container {
     width: 30px;
     height: 30px;
+}
+
+.track-nr {
+	border: solid 4px;
+	padding: 5px;
+	margin: 5px;
+}
+
+.track-nr.track-nr-single {
+	border: 0px;
+	margin: 9px;
+}
+
+.track-nr-0 {
+	border-color: rgba(255, 0, 0, 0.5);
+}
+
+.track-nr-1 {
+	border-color: rgba(128, 0, 128, 0.5);
+}
+
+.track-nr-2 {
+	border-color: rgba(0, 128, 0, 0.5);
+}
+
+.track-nr-3 {
+	border-color: rgba(128, 128, 0, 0.5);
+}
+
+.track-nr-4 {
+	border-color: rgba(0, 128, 128, 0.5);
 }
