@@ -274,21 +274,12 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 	var speedText = markerDiv.append('div').attr('class', 'marker-value');
 
 	var totalDiv = statusDiv.selectAll('.track-info').data(detail);
-	// totalDiv.enter()
-	// 	.append('div').attr('class', function(d) { return 'track-info icon-2x ' + d[0]; })
-	// 		.append('div').attr('class', function(d) { return (d[1][1] || '') })
-	// 		.html(function(d) {return d[1][0]; })
-	// 	.select(function() { return this.parentNode; })
-	// 		.append('div').attr('class', function(d) { return (d[2][1] || '') })
-	// 		.html(function(d) {return d[2][0]; });
-	// totalDiv.exit().remove();
-	totalDiv.enter()
-		.append('div').attr('class', function(d) { return 'track-info icon-2x ' + d.class; })
+	totalDiv.enter().append('div')
+		.attr('class', function(d) { return 'track-info icon-2x ' + d.class; })
 		.selectAll('div').data(function(d) { return d.data; })
 		.enter().append('div')
 			.attr('class', function(d) { return (d[1] || '') })
-			.html(function(d) {return d[0]; })
-		;
+			.html(function(d) {return d[0]; });
 
 	var moveMarker = function(evt){
 		var posX = d3.mouse(this)[0];
