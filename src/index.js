@@ -204,15 +204,15 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 		.range([height, 0])
 		.domain([minHeart, maxHeart]);
 
-	var optionalHartData = [];
-	if (!!avgHeart) optionalHartData.push([parseInt(avgHeart) + ' bpm', 'gpt-avg']);
-	if (!!maxHeart) optionalHartData.push([parseInt(maxHeart) + ' bpm', 'gpt-max']);
-	if (!!minHeart) optionalHartData.push([parseInt(minHeart) + ' bpm', 'gpt-min']);
+	var optionalHeartData = [];
+	if (!!avgHeart) optionalHeartData.push([parseInt(avgHeart) + ' bpm', 'gpt-avg']);
+	if (!!maxHeart) optionalHeartData.push([parseInt(maxHeart) + ' bpm', 'gpt-max']);
+	if (!!minHeart) optionalHeartData.push([parseInt(minHeart) + ' bpm', 'gpt-min']);
 
-	if (optionalHartData.length > 0) {
+	if (optionalHeartData.length > 0) {
 		detail.push({
 			class: 'gpt-heartbeat',
-			data: optionalHartData
+			data: optionalHeartData
 		});
 	}
 
