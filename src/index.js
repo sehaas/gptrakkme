@@ -133,7 +133,7 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 	});
 
 	var datePlaceHeart = props.coordTimes.map(function(d, i) {
-			var hr = 0; // support tracks without HR data
+			var hr = null; // support tracks without HR data
 			if (props.heartRates) {
 				hr=props.heartRates[i];
 			}
