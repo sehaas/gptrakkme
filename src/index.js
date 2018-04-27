@@ -22,6 +22,10 @@ d3.formatDefaultLocale({
 	"currency": ["", "\u00a0€"]
 });
 
+var formatHeight = d3.format(",");
+var formatSpeed = d3.format('.2f');
+var formatDistance = d3.format('.4s');
+
 // create map
 var map = gptrakkme.map = L.map(d3.select(document.body)
 	.append('div')
@@ -83,7 +87,6 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 	var dist = 0.0,
 		hM_a = 0.0,
 		hM_d = 0.0,
-		meter = d3.format(">7,d"),
 		last = {lng:coords[0][0], lat:coords[0][1], alt:coords[0][2]};
 
 	props.distance = [0.0];
@@ -112,11 +115,12 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 		}
 	});
 	var detail = [];
-	detail.push([
-		'gpt-location',
-		[d3.format('.4s')(parseInt(dist)) + "m"],
-		[]
-	]);
+	detail.push({
+		class: 'gpt-location',
+		data: [
+			[formatDistance(parseInt(dist)) + "m"]
+		]
+	});
 
 	var datePlaceHeart = props.coordTimes.map(function(d, i) {
 			var hr = 0; // support tracks without HR data
@@ -130,16 +134,28 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 		margin = 20,
 		width = d3.select('body').node().offsetWidth - 2 * margin - 10;
 
-	detail.push([
-		'gpt-stopwatch',
-		[d3.utcFormat("%Hh:%Mm:%Ss")(datePlaceHeart[datePlaceHeart.length-1][0] - datePlaceHeart[0][0])],
-		[] // TODO: Pause??
-	]);
-	detail.push([
-		'gpt-area-graph',
-		[d3.format(',')(parseInt(Math.abs(hM_a))) + 'm', 'gpt-ascent'],
-		[d3.format(',')(parseInt(Math.abs(hM_d))) + 'm', 'gpt-descent']
-	]);
+	detail.push({
+		class: 'gpt-stopwatch',
+		data : [
+			[d3.utcFormat("%Hh:%Mm:%Ss")(datePlaceHeart[datePlaceHeart.length-1][0] - datePlaceHeart[0][0])]
+		]
+	});
+
+	var maxHeight = d3.max(datePlaceHeart, function(d) { return d[1][2]; });
+	var minHeight = d3.min(datePlaceHeart, function(d) { return d[1][2]; });
+	var elevation = d3.scaleLinear()
+		.range([height, 0])
+		.domain([0, maxHeight]);
+
+	detail.push({
+		class: 'gpt-area-graph',
+		data: [
+			[formatHeight(parseInt(Math.abs(hM_a))) + 'm', 'gpt-ascent'],
+			[formatHeight(parseInt(Math.abs(hM_d))) + 'm', 'gpt-descent'],
+			[formatHeight(parseInt(maxHeight)) + 'm', 'gpt-max'],
+			[formatHeight(parseInt(minHeight)) + 'm', 'gpt-min']
+		]
+	});
 
 	// render map layers
 	var casingLayer = L.geoJson(geojson, {
@@ -157,23 +173,19 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 		.domain([datePlaceHeart[0][0], datePlaceHeart[datePlaceHeart.length-1][0]])
 		.rangeRound([0, width]);
 
-	var maxHeight = d3.max(datePlaceHeart, function(d) { return d[1][2]; });
-	var minHeight = d3.min(datePlaceHeart, function(d) { return d[1][2]; });
-	var elevation = d3.scaleLinear()
-		.range([height, 0])
-		.domain([0, maxHeight]);
-
 	var maxSpeed = d3.max(datePlaceHeart, function(d) { return d[3]; });
 	var avgSpeed = d3.mean(datePlaceHeart, function(d) { return d[3]; });
 	var minSpeed = d3.min(datePlaceHeart, function(d) { return d[3]; });
 	var speed = d3.scaleLinear()
 		.range([height, 0])
 		.domain([minSpeed, maxSpeed]);
-	detail.push([
-		'gpt-gauge',
-		[d3.format('.2f')(avgSpeed) + ' km/h', 'gpt-avg'],
-		[d3.format('.2f')(maxSpeed) + ' km/h']
-	]);
+	detail.push({
+		class: 'gpt-gauge',
+		data: [
+			[formatSpeed(avgSpeed) + ' km/h', 'gpt-avg'],
+			[formatSpeed(maxSpeed) + ' km/h', 'gpt-max']
+		]
+	});
 
 	var maxHeart = d3.max(datePlaceHeart, function(d) { return d[2]; });
 	var avgHeart = d3.mean(datePlaceHeart, function(d) { return d[2]; });
@@ -181,11 +193,18 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 	var heart = d3.scaleLinear()
 		.range([height, 0])
 		.domain([minHeart, maxHeart]);
-	detail.push([
-		'gpt-heartbeat',
-		[parseInt(avgHeart) + ' bpm', 'gpt-avg'],
-		[parseInt(maxHeart) + ' bpm']
-	]);
+
+	var optionalHartData = [];
+	if (!!avgHeart) optionalHartData.push([parseInt(avgHeart) + ' bpm', 'gpt-avg']);
+	if (!!maxHeart) optionalHartData.push([parseInt(maxHeart) + ' bpm', 'gpt-max']);
+	if (!!minHeart) optionalHartData.push([parseInt(minHeart) + ' bpm', 'gpt-min']);
+
+	if (optionalHartData.length > 0) {
+		detail.push({
+			class: 'gpt-heartbeat',
+			data: optionalHartData
+		});
+	}
 
 	var elevationLine = d3.area()
 		.x(function(d) { return x(d[0]); })
@@ -245,15 +264,21 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 	var speedText = markerDiv.append('div').attr('class', 'marker-value');
 
 	var totalDiv = statusDiv.selectAll('.track-info').data(detail);
+	// totalDiv.enter()
+	// 	.append('div').attr('class', function(d) { return 'track-info icon-2x ' + d[0]; })
+	// 		.append('div').attr('class', function(d) { return (d[1][1] || '') })
+	// 		.html(function(d) {return d[1][0]; })
+	// 	.select(function() { return this.parentNode; })
+	// 		.append('div').attr('class', function(d) { return (d[2][1] || '') })
+	// 		.html(function(d) {return d[2][0]; });
+	// totalDiv.exit().remove();
 	totalDiv.enter()
-		.append('div').attr('class', function(d) { return 'track-info icon-2x ' + d[0]; })
-			.append('div').attr('class', function(d) { return (d[1][1] || '') })
-			.html(function(d) {return d[1][0]; })
-		.select(function() { return this.parentNode; })
-			.append('div').attr('class', function(d) { return (d[2][1] || '') })
-			.html(function(d) {return d[2][0]; });
-	totalDiv.exit().remove();
-
+		.append('div').attr('class', function(d) { return 'track-info icon-2x ' + d.class; })
+		.selectAll('div').data(function(d) { return d.data; })
+		.enter().append('div')
+			.attr('class', function(d) { return (d[1] || '') })
+			.html(function(d) {return d[0]; })
+		;
 
 	var moveMarker = function(evt){
 		var posX = d3.mouse(this)[0];

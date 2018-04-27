@@ -60,7 +60,7 @@
 .gpt-area-graph:before {
 	background-position: 30% 0;
 }
-.gpt-avg:before {
+.gpt-block:before {
 	background-position: 35% 0;
 }
 .gpt-gauge:before {
@@ -75,4 +75,12 @@
 .gpt-stopwatch:before {
 	background-position: 55% 0;
 }
-
+.gpt-min:before {
+	background-position: 60% 0;
+}
+.gpt-max:before {
+	background-position: 65% 0;
+}
+.gpt-avg:before {
+	background-position: 70% 0;
+}
