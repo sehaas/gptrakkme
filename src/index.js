@@ -45,6 +45,16 @@ var BasemapAT_grau = L.tileLayer('https://maps{s}.wien.gv.at/basemap/bmapgrau/no
 	bounds: [[46.35877, 8.782379], [49.037872, 17.189532]]
 });
 BasemapAT_grau.addTo(map);
+var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	maxZoom: 19,
+	attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+});
+
+L.control.layers({
+	"Basemap" : BasemapAT_grau,
+	"Mapnik" : OpenStreetMap_Mapnik
+}).addTo(map);
+
 L.control.scale().addTo(map);
 var allLayers = L.featureGroup([]);
 L.easyButton( 'gpt-sphere', function(){
