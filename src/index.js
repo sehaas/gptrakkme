@@ -234,15 +234,20 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 		.x(function(d) { return x(d[0]); })
 		.y(function(d) { return speed(d[3]); });
 
-	var heartLine = d3.line()
-		.curve(d3.curveBasis)
-		.defined(function(d) {
-			var show = d[2]!=null;
-			if (!show) console.log('Skip HR:', d[0]);
-			return show;
-		})
-		.x(function(d) { return x(d[0]); })
-		.y(function(d) { return heart(d[2]); });
+	var heartLine = null;
+	if (optionalHeartData.length > 0) {
+		heartLine = d3.line()
+			.curve(d3.curveBasis)
+			.defined(function(d) {
+				var show = d[2]!=null;
+				if (!show) console.log('Skip HR:', d[0]);
+				return show;
+			})
+			.x(function(d) { return x(d[0]); })
+			.y(function(d) { return heart(d[2]); });
+	} else {
+		console.log('No HR available');
+	}
 
 	var trackDiv = d3.select(document.body).append('div').attr('class', 'track-nr track-nr-' + trackIndex);
 	var svg = trackDiv.append('svg')
