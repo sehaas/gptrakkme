@@ -331,6 +331,18 @@ router.on({
 			gptrakkme.renderLayer(data, 'single');
 		});
 	},
+	'/d/:datum/:orte': function(params) {
+		console.log(params);
+		var config = {
+			name: params.datum,
+			tracks: []
+		};
+		params.orte.split(',').forEach(function(ort) {
+			console.log(ort);
+			config.tracks.push('/data/Track_' + params.datum + '_' + ort + '.gpx');
+		});
+		gptrakkme.loadTracks({}, config);
+	},
 	'*': function() {
 		console.log('default', arguments);
 	}
