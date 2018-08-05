@@ -129,7 +129,8 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 	detail.push({
 		class: 'gpt-location',
 		data: [
-			[formatDistance(parseInt(dist)) + "m"]
+			[formatDistance(parseInt(dist)) + "m"],
+			[formatHeight(parseInt(coords.length)) + " trkpt"]
 		]
 	});
 
