@@ -145,10 +145,11 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 		margin = 20,
 		width = d3.select('body').node().offsetWidth - 2 * margin - 10;
 
+	var duration = datePlaceHeart[datePlaceHeart.length-1][0] - datePlaceHeart[0][0];
 	detail.push({
 		class: 'gpt-stopwatch',
 		data : [
-			[d3.utcFormat("%Hh:%Mm:%Ss")(datePlaceHeart[datePlaceHeart.length-1][0] - datePlaceHeart[0][0])]
+			[d3.utcFormat("%Hh:%Mm:%Ss")(duration)]
 		]
 	});
 
@@ -185,7 +186,8 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 		.rangeRound([0, width]);
 
 	var maxSpeed = d3.max(datePlaceHeart, function(d) { return d[3]; });
-	var avgSpeed = d3.mean(datePlaceHeart, function(d) { return d[3]; });
+	// meter / (milliseconds / 3600) => km/h
+	var avgSpeed = dist / (duration / 3600) ;
 	var minSpeed = d3.min(datePlaceHeart, function(d) { return d[3]; });
 	var speed = d3.scaleLinear()
 		.range([height, 0])
