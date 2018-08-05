@@ -8,6 +8,7 @@ require('leaflet-easybutton');
 require('leaflet-fullscreen');
 var gpx2geojson = require('@mapbox/togeojson').gpx;
 var d3 = require('d3');
+var d3axis = require('d3-axis');
 
 var coordist = require('coordist');
 var navigo = require('navigo');
@@ -261,11 +262,17 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 		.attr('class', 'speed-line')
 		.attr('d', speedLine);
 
+	var xDuration = d3.scaleTime()
+		.domain([0, datePlaceHeart[datePlaceHeart.length-1][0] - datePlaceHeart[0][0]])
+		.rangeRound([0, width]);
+	var xAxis = d3axis.axisBottom(xDuration);
+	xAxis.tickFormat(d3.utcFormat("%-Hh%M"));
+	g.append('g').attr('transform', 'translate(0,' + height + ')').call(xAxis);
+
 	var marker = g.append('rect')
 		.attr('width', 1)
 		.attr('class', 'here-indicator')
 		.attr('height', height);
-
 
 	var statusDiv = trackDiv.append('div').attr('class', 'status-box');
 	var markerDiv = statusDiv.append('div').attr('class', 'marker-box').attr('style', 'display:none;');
