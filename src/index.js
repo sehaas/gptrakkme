@@ -95,6 +95,8 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 	var props = geojson.features[0].properties,
 		coords = geojson.features[0].geometry.coordinates;
 
+	var useTimeAxis = true && !!props.coordTimes;
+
 	var dist = 0.0,
 		hM_a = 0.0,
 		hM_d = 0.0,
@@ -112,16 +114,20 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 			hM_d += hm;
 		}
 		var d = coordist.distance(last, curr, false);
-		var dt = new Date(props.coordTimes[i]) - new Date(props.coordTimes[i-1]);
-		var tmp_speed = dt != 0 ? 3600 * d / dt : null;
-		speedDeviation.push(tmp_speed);
-		props.speed[i] = tmp_speed;
-		props.distance[i] = d;
+		var tmp_speed = null;
+		if (props.coordTimes) {
+			var dt = new Date(props.coordTimes[i]) - new Date(props.coordTimes[i-1]);
+			tmp_speed = dt != 0 ? 3600 * d / dt : null;
+			speedDeviation.push(tmp_speed);
+			props.speed[i] = tmp_speed;
+		}
 		dist += d;
+		props.distance[i] = dist;
+		props.speed[i] = tmp_speed;
 		last = curr;
 	}
 	props.speed.forEach(function(v, i) {
-		if ((v - speedDeviation.mean()) > (speedDeviation.standardDeviation() * 5)) {
+		if ((v - speedDeviation.mean()) > (speedDeviation.standardDeviation() * 10)) {
 			props.speed[i] = null;
 		}
 	});
@@ -134,25 +140,46 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 		]
 	});
 
-	var datePlaceHeart = props.coordTimes.map(function(d, i) {
-			var hr = null; // support tracks without HR data
-			if (props.heartRates) {
-				hr=props.heartRates[i];
-			}
-			return [new Date(d), coords[i], hr, props.speed[i]];
-		}),
-		bisectPlace = d3.bisector(function(d) { return d[0]; }).left,
+	var datePlaceHeart;
+	var duration;
+
+	if (useTimeAxis) {
+		datePlaceHeart = props.coordTimes.map(function(d, i) {
+				var hr = null; // support tracks without HR data
+				if (props.heartRates) {
+					hr = props.heartRates[i];
+				}
+				return [new Date(d), coords[i], hr, props.speed[i]];
+			});
+	} else {
+		datePlaceHeart = coords.map(function(d, i) {
+				var hr = null; // support tracks without HR data
+				if (props.heartRates) {
+					hr = props.heartRates[i];
+				}
+				return [props.distance[i], coords[i], hr, props.speed[i]];
+			});
+	}
+	if (props.coordTimes) {
+		var minmax = d3.extent(props.coordTimes);
+		var start = new Date(minmax[0]);
+		var ende = new Date(minmax[1]);
+		duration = ende - start;
+		detail.push({
+			class: 'gpt-stopwatch',
+			data : [
+				[d3.utcFormat("%Hh:%Mm:%Ss")(duration)],
+				[d3.timeFormat("%H:%M")(start) + ' - ' + d3.timeFormat("%H:%M")(ende)]
+			]
+		});
+	}
+
+
+	var bisectPlace = d3.bisector(function(d) { return d[0]; }).left,
 		height = 100,
 		margin = 20,
 		width = d3.select('body').node().offsetWidth - 2 * margin - 10;
 
-	var duration = datePlaceHeart[datePlaceHeart.length-1][0] - datePlaceHeart[0][0];
-	detail.push({
-		class: 'gpt-stopwatch',
-		data : [
-			[d3.utcFormat("%Hh:%Mm:%Ss")(duration)]
-		]
-	});
 
 	var maxHeight = d3.max(datePlaceHeart, function(d) { return d[1][2]; });
 	var minHeight = d3.min(datePlaceHeart, function(d) { return d[1][2]; });
@@ -182,24 +209,10 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 	map.fitBounds(allLayers.getBounds());
 	hereMarker.bringToFront();
 
-	var x = d3.scaleTime()
-		.domain([datePlaceHeart[0][0], datePlaceHeart[datePlaceHeart.length-1][0]])
+	var x = useTimeAxis ? d3.scaleTime() : d3.scaleLinear();
+	x.domain([datePlaceHeart[0][0], datePlaceHeart[datePlaceHeart.length-1][0]])
 		.rangeRound([0, width]);
 
-	var maxSpeed = d3.max(datePlaceHeart, function(d) { return d[3]; });
-	// meter / (milliseconds / 3600) => km/h
-	var avgSpeed = dist / (duration / 3600) ;
-	var minSpeed = d3.min(datePlaceHeart, function(d) { return d[3]; });
-	var speed = d3.scaleLinear()
-		.range([height, 0])
-		.domain([minSpeed, maxSpeed]);
-	detail.push({
-		class: 'gpt-gauge',
-		data: [
-			[formatSpeed(avgSpeed) + ' km/h', 'gpt-avg'],
-			[formatSpeed(maxSpeed) + ' km/h', 'gpt-max']
-		]
-	});
 
 	var maxHeart = d3.max(datePlaceHeart, function(d) { return d[2]; });
 	var avgHeart = d3.mean(datePlaceHeart, function(d) { return d[2]; });
@@ -225,23 +238,13 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 		.y0(height)
 		.y1(function(d) { return elevation(d[1][2]); });
 
-	var speedLine = d3.line()
-		.curve(d3.curveBasis)
-		.defined(function(d) {
-			var show = d[3]!=null;
-			if (!show) console.log('Skip speed:', d[0]);
-			return show;
-		})
-		.x(function(d) { return x(d[0]); })
-		.y(function(d) { return speed(d[3]); });
-
 	var heartLine = null;
 	if (optionalHeartData.length > 0) {
 		heartLine = d3.line()
 			.curve(d3.curveBasis)
 			.defined(function(d) {
 				var show = d[2]!=null;
-				if (!show) console.log('Skip HR:', d[0]);
+				// if (!show) console.log('Skip HR:', d[0]);
 				return show;
 			})
 			.x(function(d) { return x(d[0]); })
@@ -265,17 +268,54 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 		.datum(datePlaceHeart)
 		.attr('class', 'heart-line')
 		.attr('d', heartLine);
-	g.append('path')
-		.datum(datePlaceHeart)
-		.attr('class', 'speed-line')
-		.attr('d', speedLine);
 
-	var xDuration = d3.scaleTime()
-		.domain([0, datePlaceHeart[datePlaceHeart.length-1][0] - datePlaceHeart[0][0]])
-		.rangeRound([0, width]);
-	var xAxis = d3axis.axisBottom(xDuration);
-	xAxis.tickFormat(d3.utcFormat("%-Hh%M"));
-	g.append('g').attr('transform', 'translate(0,' + height + ')').call(xAxis);
+
+	if (props.coordTimes) {
+		var maxSpeed = d3.max(datePlaceHeart, function(d) { return d[3]; });
+		// meter / (milliseconds / 3600) => km/h
+		var avgSpeed = dist / (duration / 3600) ;
+		var minSpeed = d3.min(datePlaceHeart, function(d) { return d[3]; });
+		var speed = d3.scaleLinear()
+			.range([height, 0])
+			.domain([minSpeed, maxSpeed]);
+		detail.push({
+			class: 'gpt-gauge',
+			data: [
+				[formatSpeed(avgSpeed) + ' km/h', 'gpt-avg'],
+				[formatSpeed(maxSpeed) + ' km/h', 'gpt-max']
+			]
+		});
+
+		var speedLine = d3.line()
+			.curve(d3.curveBasis)
+			.defined(function(d) {
+				var show = d[3]!=null;
+				// if (!show) console.log('Skip speed:', d[0]);
+				return show;
+			})
+			.x(function(d) { return x(d[0]); })
+			.y(function(d) { return speed(d[3]); });
+		g.append('path')
+			.datum(datePlaceHeart)
+			.attr('class', 'speed-line')
+			.attr('d', speedLine);
+	}
+
+	if (useTimeAxis) {
+		var xDuration = d3.scaleTime()
+			.domain([0, datePlaceHeart[datePlaceHeart.length-1][0] - datePlaceHeart[0][0]])
+			.rangeRound([0, width]);
+		var xAxis = d3axis.axisBottom(xDuration);
+		xAxis.tickFormat(d3.utcFormat("%-Hh%M"));
+		g.append('g').attr('transform', 'translate(0,' + height + ')').call(xAxis);
+	} else {
+		var xDuration = d3.scaleLinear()
+			.domain([0, datePlaceHeart[datePlaceHeart.length-1][0] - datePlaceHeart[0][0]])
+			.rangeRound([0, width]);
+		var xAxis = d3axis.axisBottom(xDuration);
+		xAxis.tickFormat((t) => d3.formatPrefix(".2", 1e4)(t) + 'm');
+		g.append('g').attr('transform', 'translate(0,' + height + ')').call(xAxis);
+	}
 
 	var marker = g.append('rect')
 		.attr('width', 1)
