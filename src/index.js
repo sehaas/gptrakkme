@@ -74,7 +74,7 @@ gptrakkme.colors = {
 	'4': '#008080'
 };
 
-gptrakkme.loadTracks = function(error, data) {
+gptrakkme.loadTracks = function(data) {
 	d3.select('title').text('gptrakkme | ' + data.name);
 	var q = [];
 	data.tracks.forEach(function(track) {
@@ -83,9 +83,7 @@ gptrakkme.loadTracks = function(error, data) {
 	});
 	Promise.all(q).then((results) => {
 		results.forEach(gptrakkme.renderLayer);
-	}).catch((error) => {
-		console.log(error);
-	});
+	}).catch(console.error);
 };
 
 gptrakkme.renderLayer = function(str, trackIndex) {
@@ -363,13 +361,13 @@ var router = new navigo(root, useHash, hash);
 router.on({
 	'/:trk': function(params) {
 		console.log(params);
-		d3.json('/data/' + params.trk, gptrakkme.loadTracks);
+		d3.json('/data/' + params.trk).then(gptrakkme.loadTracks);
 	},
 	'/r/:trk': function(params) {
 		console.log(params);
-		d3.text('/data/' + params.trk + '.gpx', function(data) {
+		d3.text('/data/' + params.trk + '.gpx').then((data) => {
 			gptrakkme.renderLayer(data, 'single');
-		});
+		}).catch(console.error);
 	},
 	'/d/:datum/:orte': function(params) {
 		console.log(params);
@@ -381,7 +379,7 @@ router.on({
 			console.log(ort);
 			config.tracks.push('/data/Track_' + params.datum + '_' + ort + '.gpx');
 		});
-		gptrakkme.loadTracks({}, config);
+		gptrakkme.loadTracks(config);
 	},
 	'*': function() {
 		console.log('default', arguments);
