@@ -1,14 +1,13 @@
-import './style.css';
-import '../node_modules/leaflet/dist/leaflet.css';
-import '../node_modules/leaflet-fullscreen/dist/leaflet.fullscreen.css';
-import './sprite.css';
+require('leaflet_css');
+require('leaflet_fullscreen_css');
+require('sprite_css');
+require('style_css');
 
 var L = require('leaflet');
 require('leaflet-easybutton');
 require('leaflet-fullscreen');
 var gpx2geojson = require('@mapbox/togeojson').gpx;
 var d3 = require('d3');
-var d3axis = require('d3-axis');
 
 var coordist = require('coordist');
 var navigo = require('navigo');
@@ -77,14 +76,15 @@ gptrakkme.colors = {
 
 gptrakkme.loadTracks = function(error, data) {
 	d3.select('title').text('gptrakkme | ' + data.name);
-	var q = d3.queue();
+	var q = [];
 	data.tracks.forEach(function(track) {
 		console.log(track);
-		q = q.defer(d3.text, track);
+		q.push(d3.text(track));
 	});
-	q.awaitAll(function(error, results) {
-		if (error) throw error;
+	Promise.all(q).then((results) => {
 		results.forEach(gptrakkme.renderLayer);
+	}).catch((error) => {
+		console.log(error);
 	});
 };
 
@@ -305,14 +305,14 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 		var xDuration = d3.scaleTime()
 			.domain([0, datePlaceHeart[datePlaceHeart.length-1][0] - datePlaceHeart[0][0]])
 			.rangeRound([0, width]);
-		var xAxis = d3axis.axisBottom(xDuration);
+		var xAxis = d3.axisBottom(xDuration);
 		xAxis.tickFormat(d3.utcFormat("%-Hh%M"));
 		g.append('g').attr('transform', 'translate(0,' + height + ')').call(xAxis);
 	} else {
 		var xDuration = d3.scaleLinear()
 			.domain([0, datePlaceHeart[datePlaceHeart.length-1][0] - datePlaceHeart[0][0]])
 			.rangeRound([0, width]);
-		var xAxis = d3axis.axisBottom(xDuration);
+		var xAxis = d3.axisBottom(xDuration);
 		xAxis.tickFormat((t) => d3.formatPrefix(".2", 1e4)(t) + 'm');
 		g.append('g').attr('transform', 'translate(0,' + height + ')').call(xAxis);
 	}

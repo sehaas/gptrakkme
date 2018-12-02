@@ -8,6 +8,14 @@ const config = {
 	entry: {
 		app: './src/index.js'
 	},
+	resolve: {
+		alias: {
+			style_css: __dirname + '/src/style.css',
+			sprite_css: __dirname + '/src/sprite.css',
+			leaflet_css: __dirname + '/node_modules/leaflet/dist/leaflet.css',
+			leaflet_fullscreen_css: __dirname + '/node_modules/leaflet-fullscreen/dist/leaflet.fullscreen.css',
+		}
+	},
 	output: {
 		filename: '[name].bundle.js',
 		path: path.resolve(__dirname, 'dist'),
