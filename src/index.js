@@ -49,9 +49,17 @@ var OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{
 	maxZoom: 19,
 	attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 });
+var BasemapAT_ortho = L.tileLayer('https://maps{s}.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.{format}', {
+	maxZoom: 19,
+	attribution: 'Datenquelle: <a href="www.basemap.at">basemap.at</a>',
+	subdomains: ["", "1", "2", "3", "4"],
+	format: 'jpeg',
+	bounds: [[46.35877, 8.782379], [49.037872, 17.189532]]
+});
 
 L.control.layers({
 	"Basemap" : BasemapAT_grau,
+	"Ortho" : BasemapAT_ortho,
 	"Mapnik" : OpenStreetMap_Mapnik
 }).addTo(map);
 
