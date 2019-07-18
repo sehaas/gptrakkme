@@ -101,7 +101,7 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 	var props = geojson.features[0].properties,
 		coords = geojson.features[0].geometry.coordinates;
 
-	var useTimeAxis = true && !!props.coordTimes;
+	var useTimeAxis = false && !!props.coordTimes;
 
 	var dist = 0.0,
 		hM_a = 0.0,
