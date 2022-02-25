@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const config = {
@@ -22,7 +22,9 @@ const config = {
 		publicPath: '/'
 	},
 	devServer: {
-		contentBase: path.resolve(__dirname, 'dist'),
+		static: {
+			directory: path.resolve(__dirname, 'dist'),
+		},
 		historyApiFallback: {
 			index: '/index.html'
 		}
@@ -33,12 +35,12 @@ const config = {
 				test: /\.css$/,
 				use: [
 					'style-loader',
-					'css-loader'
-				]
+					'css-loader',
+				],
 			},
 			{
 				test: /\.(png|svg|jpg|gif)$/,
-				use: ['file-loader']
+				type: 'asset/resource',
 			}
 		]
 	},
@@ -51,17 +53,17 @@ const config = {
 
 if (process.env.SKIP_CLEAN !== 'true') {
 	config.plugins.push(
-		new CleanWebpackPlugin(['dist'])
+		new CleanWebpackPlugin()
 	);
 }
 if (process.env.NODE_ENV !== 'FIXME_production') {
 	config.plugins.push(
-		new CopyWebpackPlugin([
-			{
+		new CopyWebpackPlugin({
+			patterns: [{
 				from: 'test_data',
 				to: 'data'
-			}
-		])
+			}],
+		})
 	);
 }
 

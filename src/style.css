@@ -1,66 +1,73 @@
 body {
-	margin:0;
+	margin: 0;
 }
 
-#map { width:100%; height:500px; }
-.easy-button-button { width:30px; height:30px; }
+#map {
+	width: 100%;
+	height: 500px;
+}
+.easy-button-button {
+	width: 30px;
+	height: 30px;
+}
 
 .label {
-	font:bold 12px sans-serif;
+	font: bold 12px sans-serif;
 }
 
 .elevation-area {
-	fill:#000;
-	opacity:0.3;
+	fill: #000;
+	opacity: 0.3;
 }
 
 .heart-line {
-	fill:none;
+	fill: none;
 	stroke-width: 1;
-	stroke:darkred;
+	stroke: darkred;
 }
 
 .speed-line {
-	fill:none;
+	fill: none;
 	stroke-width: 1;
-	stroke:blue;
+	stroke: blue;
 }
 
 .here-indicator {
-	fill:darkred;
+	fill: darkred;
 }
 
 .chart text {
-	font-size:10px;
+	font-size: 10px;
 }
 
 .status-box {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-around;
 }
 
-.marker-box, .total-box {
-    flex: 50% 1 0;
+.marker-box,
+.total-box {
+	flex: 50% 1 0;
 }
 
 .track-info > div {
 	text-align: right;
 }
 .easy-button-button .gpt-sphere {
-    padding-left: 0px;
-    margin-left: 0em;
-    font-size: 20px;
-    left: -11px;
-    top: -11px;
+	padding-left: 0px;
+	margin-left: 0em;
+	font-size: 20px;
+	left: -19px;
+	top: -11px;
 }
 button.easy-button-button {
-    border: none;
+	border: none;
 }
 
 .easy-button-container {
-    width: 30px;
-    height: 30px;
+	width: 30px;
+	height: 30px;
 }
 
 .track-nr {

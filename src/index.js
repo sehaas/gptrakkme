@@ -361,35 +361,34 @@ gptrakkme.renderLayer = function(str, trackIndex) {
 		.on("mousemove", moveMarker);
 };
 
-var root = window.location.origin;
+var root = "/";//window.location.origin;
 var useHash = false; // Defaults to: false
 var hash = '#!'; // Defaults to: '#'
 var router = new navigo(root, useHash, hash);
 
-router.on({
-	'/:trk': function(params) {
-		console.log(params);
-		d3.json('/data/' + params.trk).then(gptrakkme.loadTracks);
-	},
-	'/r/:trk': function(params) {
-		console.log(params);
-		d3.text('/data/' + params.trk + '.gpx').then((data) => {
-			gptrakkme.renderLayer(data, 'single');
-		}).catch(console.error);
-	},
-	'/d/:datum/:orte': function(params) {
-		console.log(params);
-		var config = {
-			name: params.datum,
-			tracks: []
-		};
-		params.orte.split(',').forEach(function(ort) {
-			console.log(ort);
-			config.tracks.push('/data/Track_' + params.datum + '_' + ort + '.gpx');
-		});
-		gptrakkme.loadTracks(config);
-	},
-	'*': function() {
-		console.log('default', arguments);
-	}
-}).resolve();
+router.on('/:trk', function(params) {
+	console.log(params);
+	d3.json('/data/' + params.data.trk).then(gptrakkme.loadTracks);
+});
+router.on('/r/:trk', function(params) {
+	console.log(params);
+	d3.text('/data/' + params.data.trk + '.gpx').then((data) => {
+		gptrakkme.renderLayer(data, 'single');
+	}).catch(console.error);
+});
+router.on('/d/:datum/:orte', function(params) {
+	console.log(params);
+	var config = {
+		name: params.data.datum,
+		tracks: []
+	};
+	params.data.orte.split(',').forEach(function(ort) {
+		console.log(ort);
+		config.tracks.push('/data/Track_' + params.data.datum + '_' + ort + '.gpx');
+	});
+	gptrakkme.loadTracks(config);
+});
+router.on('*', function() {
+	console.log('default', arguments);
+});
+router.resolve();
