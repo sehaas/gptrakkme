@@ -5,7 +5,7 @@
 	"main": "dist/bundle.js",
 	"scripts": {
 		"build": "webpack --mode=development",
-		"build:dist": "webpack --mode=production -p",
+		"build:dist": "webpack --mode=production --progress",
 		"watch": "webpack --watch",
 		"start": "SKIP_CLEAN=true webpack-dev-server --mode=development --open"
 	},
