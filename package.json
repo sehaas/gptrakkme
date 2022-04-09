@@ -46,7 +46,7 @@
 		"leaflet": "^1.7.1",
 		"leaflet-easybutton": "^2.4.0",
 		"leaflet-fullscreen": "^1.0.2",
-		"minimist": "^1.2.5",
+		"minimist": "^1.2.6",
 		"navigo": "^8.11.1",
 		"standard-deviation-stream": "^0.0.3",
 		"xmldom": "^0.6.0"
